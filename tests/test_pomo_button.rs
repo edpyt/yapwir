@@ -11,3 +11,8 @@ fn test_pomo_button_start() {
         || view! { <StartStopButton /> },
     );
 }
+
+#[test]
+fn test_testttt() {
+    println!("Hello World!");
+}

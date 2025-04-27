@@ -1,5 +1,4 @@
 mod app;
-mod tests;
 
 use app::*;
 use leptos::prelude::*;
