@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use yapwir_ui::components::StartStopButton;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -7,9 +8,4 @@ pub fn App() -> impl IntoView {
             <StartStopButton />
         </div>
     }
-}
-
-#[component]
-pub fn StartStopButton() -> impl IntoView {
-    view! { <button class="btn btn-circle btn-soft p-[142px] text-2xl">START</button> }
 }
