@@ -17,14 +17,13 @@ impl StartStopButtonText {
 
 #[component]
 pub fn StartStopButton(
-    is_clicked_signal: (ReadSignal<bool>, WriteSignal<bool>),
-    #[prop(default = signal(StartStopButtonText::Start))] btn_text_signal: (
-        ReadSignal<StartStopButtonText>,
-        WriteSignal<StartStopButtonText>,
-    ),
+    is_clicked_signal: RwSignal<bool>,
+    #[prop(default = RwSignal::new(StartStopButtonText::Start))] btn_text_signal: RwSignal<
+        StartStopButtonText,
+    >,
 ) -> impl IntoView {
-    let (is_clicked, set_is_clicked) = is_clicked_signal;
-    let (btn_text, set_btn_text) = btn_text_signal;
+    let (is_clicked, set_is_clicked) = is_clicked_signal.split();
+    let (btn_text, set_btn_text) = btn_text_signal.split();
     view! {
         <button
             class="btn btn-circle btn-soft p-[142px] text-2xl"
@@ -58,10 +57,9 @@ mod tests {
     async fn test_click_button() {
         // Arrange
         let document = document();
-        let is_clicked_signal = signal(false);
-        let btn_text_signal = signal(StartStopButtonText::Start);
+        let is_clicked_signal = RwSignal::new(false);
+        let btn_text_signal = RwSignal::new(StartStopButtonText::Start);
         let test_wrapper = document.create_element("section").unwrap();
-        let _ = document.body().unwrap().append_child(&test_wrapper);
         let _dispose = mount_to(
             test_wrapper.clone().unchecked_into(),
             move || view! { <StartStopButton is_clicked_signal btn_text_signal /> },
@@ -70,7 +68,10 @@ mod tests {
             .query_selector("button")
             .unwrap()
             .unwrap()
-            .unchecked_into::<web_sys::HtmlElement>();
+            .unchecked_into::<web_sys::HtmlButtonElement>();
+
+        // Assert
+        assert_eq!(btn.text_content().unwrap(), "START");
 
         // Assert
         assert_eq!(btn.text_content().unwrap(), "START");
