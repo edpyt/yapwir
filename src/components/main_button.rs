@@ -3,7 +3,6 @@ use leptos::prelude::*;
 pub enum StartStopButtonText {
     Start,
     Stop,
-    // TODO: add `resume` text
 }
 
 impl StartStopButtonText {
@@ -81,8 +80,8 @@ mod tests {
         tick().await;
 
         // Assert
-        assert!(is_clicked_signal.0.get_untracked());
-        assert_eq!(btn_text_signal.0.get_untracked(), StartStopButtonText::Stop);
+        assert!(is_clicked_signal.get_untracked());
+        assert_eq!(btn_text_signal.get_untracked(), StartStopButtonText::Stop);
         assert_eq!(btn.text_content().unwrap(), "STOP");
     }
 }
