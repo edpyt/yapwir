@@ -44,6 +44,7 @@ pub fn StartStopButton(
 #[cfg(test)]
 mod tests {
     use leptos::prelude::*;
+    use leptos::task::tick;
     use leptos::web_sys;
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
@@ -54,7 +55,7 @@ mod tests {
 
     #[allow(dead_code)]
     #[wasm_bindgen_test]
-    fn test_click_button() {
+    async fn test_click_button() {
         // Arrange
         let document = document();
         let is_clicked_signal = signal(false);
@@ -71,13 +72,16 @@ mod tests {
             .unwrap()
             .unchecked_into::<web_sys::HtmlElement>();
 
+        // Assert
+        assert_eq!(btn.text_content().unwrap(), "START");
+
         // Act
         btn.click();
+        tick().await;
 
         // Assert
         assert!(is_clicked_signal.0.get_untracked());
         assert_eq!(btn_text_signal.0.get_untracked(), StartStopButtonText::Stop);
-        // FIXME:
-        // assert_eq!(btn.text_content().unwrap(), "STOP");
+        assert_eq!(btn.text_content().unwrap(), "STOP");
     }
 }
