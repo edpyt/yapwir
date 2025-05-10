@@ -40,6 +40,7 @@ pub fn StartStopButton(
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 mod tests {
     use leptos::prelude::*;
     use leptos::task::tick;
@@ -51,7 +52,6 @@ mod tests {
 
     wasm_bindgen_test_configure!(run_in_browser);
 
-    #[allow(dead_code)]
     #[wasm_bindgen_test]
     async fn test_click_button() {
         // Arrange
@@ -68,9 +68,6 @@ mod tests {
             .unwrap()
             .unwrap()
             .unchecked_into::<web_sys::HtmlButtonElement>();
-
-        // Assert
-        assert_eq!(btn.text_content().unwrap(), "START");
 
         // Assert
         assert_eq!(btn.text_content().unwrap(), "START");
