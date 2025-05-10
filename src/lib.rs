@@ -32,10 +32,13 @@ mod tests {
         let _ = document.body().unwrap().append_child(&test_wrapper);
         let _dispose = mount_to(test_wrapper.clone().unchecked_into(), || view! { <App /> });
         let div = document.query_selector("div").unwrap().unwrap();
+        let inner = div.inner_html();
 
-        assert_eq!(
-            div.inner_html(),
+        assert!(inner.contains(
             "<button class=\"btn btn-circle btn-soft p-[142px] text-2xl\">START</button>"
-        );
+        ));
+        assert!(inner.contains("hours"));
+        assert!(inner.contains("minutes"));
+        assert!(inner.contains("seconds"));
     }
 }
