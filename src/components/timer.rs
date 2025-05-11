@@ -123,7 +123,7 @@ mod tests {
         // Arrange
         let pomo_state = RwSignal::new(false);
         let duration = RwSignal::new(Duration::new(2, 0));
-        let duration_before = duration.get_untracked();
+        let _duration_before = duration.get_untracked();
         let document = document();
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
