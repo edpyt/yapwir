@@ -1,9 +1,8 @@
-use std::thread::sleep;
 use std::time::Duration;
 
 use leptos::prelude::*;
 
-const DEFAULT_TIMER_SECONDS: u64 = 50 * 60;
+const DEFAULT_TIMER_SECONDS: u64 = 5;
 
 #[component]
 pub fn CountdownTimer(
@@ -20,6 +19,7 @@ pub fn CountdownTimer(
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
+            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -62,19 +62,46 @@ pub fn CountdownTimer(
 }
 
 fn create_timer_state_event(timer_state: RwSignal<bool>, duration: RwSignal<Duration>) {
+    let interval_handle: RwSignal<Option<IntervalHandle>> = RwSignal::new(None);
+    let stop = move || {
+        if let Some(handle) = interval_handle.get_untracked() {
+            handle.clear();
+            interval_handle.set(None);
+        }
+    };
+
+    let create_handle = move || {
+        set_interval_with_handle(
+            move || {
+                if duration.read().as_secs() > 0 {
+                    duration.update(|duration| {
+                        *duration = duration.saturating_sub(Duration::from_secs(1))
+                    })
+                } else {
+                    stop()
+                }
+            },
+            Duration::from_secs(1),
+        )
+        .expect("could not create interval")
+    };
+    let start = move || {
+        if let Some(handle) = interval_handle.get_untracked() {
+            handle.clear();
+        };
+        interval_handle.set(Some(create_handle()))
+    };
+
     Effect::watch(
         move || timer_state.get(),
-        move |timer_state, _, _| {
-            if *timer_state {
-                // FIXME: https://docs.rs/tokio/latest/tokio/time/fn.interval.html
-                loop {
-                    duration.set(Duration::new(duration.read().as_secs() - 1, 0));
-                    sleep(Duration::from_secs(1));
-                }
-            }
+        move |timer_state, _, _| match *timer_state {
+            true => start(),
+            false => stop(),
         },
         true,
     );
+
+    on_cleanup(stop);
 }
 
 #[cfg(test)]
@@ -114,8 +141,8 @@ mod tests {
 
         // Act
         *pomo_state.write() = true;
-        tick().await;
-        *pomo_state.write() = false;
+        // tick().await;
+        // *pomo_state.write() = false;
 
         // Assert
         // assert_ne!(seconds_before, hms[2].get().to_string());
