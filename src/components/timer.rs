@@ -1,10 +1,9 @@
-use std::iter::zip;
 use std::thread::sleep;
 use std::time::Duration;
 
 use leptos::prelude::*;
 
-const DEFAULT_TIMER_SECONDS: u64 = 50;
+const DEFAULT_TIMER_SECONDS: u64 = 50 * 60;
 
 #[component]
 pub fn CountdownTimer(
@@ -18,33 +17,46 @@ pub fn CountdownTimer(
     let seconds = move || duration.read().as_secs() % 60;
     let minutes = move || (duration.read().as_secs() / 60) % 60;
     let hours = move || (duration.read().as_secs() / 60) / 60;
-    let hms = [
-        (Box::new(hours), "hours"),
-        (Box::new(minutes), "minutes"),
-        (Box::new(seconds), "seconds"),
-    ];
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
-            {hms
-                .into_iter()
-                .map(|(var_fn, name)| {
-                    view! {
-                        <div class="flex flex-col">
-                            <span class="countdown font-mono text-5xl">
-                                <span
-                                    style=move || format!("--value:{};", var_fn())
-                                    aria-live="polite"
-                                    aria-label=var_fn
-                                >
-                                    {var_fn}
-                                </span>
-                            </span>
-                            {name}
-                        </div>
-                    }
-                })
-                .collect_view()}
+            <div class="flex flex-col">
+                <span class="countdown font-mono text-5xl">
+                    <span
+                        style=move || format!("--value:{};", hours())
+                        aria-live="polite"
+                        aria-label=hours
+                    >
+                        {hours}
+                    </span>
+                </span>
+                "hours"
+            </div>
+            <div class="flex flex-col">
+                <span class="countdown font-mono text-5xl">
+                    <span
+                        style=move || format!("--value:{};", minutes())
+                        aria-live="polite"
+                        aria-label=minutes
+                    >
+                        {minutes}
+                    </span>
+                </span>
+                "minutes"
+            </div>
+            <div class="flex flex-col">
+                <span class="countdown font-mono text-5xl">
+                    <span
+                        style=move || format!("--value:{};", seconds())
+                        aria-live="polite"
+                        aria-label=seconds
+                    >
+                        {seconds}
+                    </span>
+                </span>
+                "seconds"
+            </div>
+
         </div>
     }
 }
