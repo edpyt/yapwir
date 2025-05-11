@@ -110,7 +110,7 @@ mod tests {
 
     use std::time::Duration;
 
-    use leptos::{prelude::*, task::tick, web_sys};
+    use leptos::{prelude::*, task::tick};
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
 
@@ -123,28 +123,23 @@ mod tests {
         // Arrange
         let pomo_state = RwSignal::new(false);
         let duration = RwSignal::new(Duration::new(2, 0));
+        let duration_before = duration.get_untracked();
         let document = document();
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
             test_wrapper.clone().unchecked_into(),
             move || view! { <CountdownTimer timer_state=pomo_state duration /> },
         );
-        let div = test_wrapper
-            .query_selector("div")
-            .unwrap()
-            .unwrap()
-            .unchecked_into::<web_sys::HtmlButtonElement>();
-        let hours = div.first_child().unwrap();
-        let minutes = hours.next_sibling().unwrap();
-        let seconds = minutes.next_sibling().unwrap();
-        let seconds_before = seconds.text_content().unwrap();
 
         // Act
         *pomo_state.write() = true;
-        // tick().await;
-        // *pomo_state.write() = false;
+        tick().await;
 
         // Assert
-        // assert_ne!(seconds_before, hms[2].get().to_string());
+        // FIXME:
+        // assert_ne!(
+        //     duration.get_untracked().as_micros(),
+        //     duration_before.as_micros()
+        // );
     }
 }
