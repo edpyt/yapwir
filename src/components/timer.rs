@@ -78,7 +78,8 @@ fn create_timer_state_event(timer_state: RwSignal<bool>, duration: RwSignal<Dura
                         *duration = duration.saturating_sub(Duration::from_secs(1))
                     })
                 } else {
-                    stop()
+                    stop();
+                    timer_state.set(false);
                 }
             },
             Duration::from_secs(1),
