@@ -4,11 +4,20 @@ use leptos::prelude::*;
 
 const DEFAULT_TIMER_SECONDS: u64 = 5;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TimerMode {
+    Focus(u64),
+    Break(u64),
+}
+
 #[component]
 pub fn CountdownTimer(
     timer_state: RwSignal<bool>,
     #[prop(default = RwSignal::new(Duration::new(DEFAULT_TIMER_SECONDS, 0)))] duration: RwSignal<
         Duration,
+    >,
+    #[prop(default=RwSignal::new(TimerMode::Focus(DEFAULT_TIMER_SECONDS)))] timer_mode: RwSignal<
+        TimerMode,
     >,
 ) -> impl IntoView {
     create_timer_state_event(timer_state, duration);
@@ -19,7 +28,7 @@ pub fn CountdownTimer(
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
-            // TODO: use forloop
+            // TODO: use forloop <div class="flex flex-col">
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -30,7 +39,7 @@ pub fn CountdownTimer(
                         {hours}
                     </span>
                 </span>
-                "hours"
+                "H"
             </div>
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
@@ -42,7 +51,7 @@ pub fn CountdownTimer(
                         {minutes}
                     </span>
                 </span>
-                "minutes"
+                "M"
             </div>
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
@@ -54,7 +63,7 @@ pub fn CountdownTimer(
                         {seconds}
                     </span>
                 </span>
-                "seconds"
+                "S"
             </div>
 
         </div>
@@ -115,6 +124,8 @@ mod tests {
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
 
+    use crate::components::timer::TimerMode;
+
     use super::CountdownTimer;
 
     wasm_bindgen_test_configure!(run_in_browser);
@@ -124,12 +135,13 @@ mod tests {
         // Arrange
         let pomo_state = RwSignal::new(false);
         let duration = RwSignal::new(Duration::new(2, 0));
+        let timer_mode = RwSignal::new(TimerMode::Focus);
         let _duration_before = duration.get_untracked();
         let document = document();
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
             test_wrapper.clone().unchecked_into(),
-            move || view! { <CountdownTimer timer_state=pomo_state duration /> },
+            move || view! { <CountdownTimer timer_state=pomo_state duration timer_mode /> },
         );
 
         // Act
@@ -142,5 +154,11 @@ mod tests {
         //     duration.get_untracked().as_micros(),
         //     duration_before.as_micros()
         // );
+
+        // Act
+        *duration.write() = Duration::new(0, 0);
+
+        // Assert
+        assert_eq!(timer_mode.get_untracked(), TimerMode::Break);
     }
 }
