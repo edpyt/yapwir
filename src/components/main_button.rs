@@ -1,40 +1,13 @@
 use leptos::prelude::*;
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum StartStopButtonText {
-    Start,
-    Stop,
-}
-
-impl StartStopButtonText {
-    fn as_str(&self) -> &'static str {
-        match self {
-            StartStopButtonText::Start => "start",
-            StartStopButtonText::Stop => "stop",
-        }
-    }
-}
 
 #[component]
-pub fn StartStopButton(
-    is_clicked_signal: RwSignal<bool>,
-    #[prop(default = RwSignal::new(StartStopButtonText::Start))] btn_text_signal: RwSignal<
-        StartStopButtonText,
-    >,
-) -> impl IntoView {
-    let (is_clicked, set_is_clicked) = is_clicked_signal.split();
-    let (btn_text, set_btn_text) = btn_text_signal.split();
+pub fn StartStopButton(is_clicked_signal: RwSignal<bool>) -> impl IntoView {
     view! {
         <button
             class="btn btn-circle btn-soft p-[142px] text-2xl"
-            on:click=move |_| {
-                set_is_clicked.set(!is_clicked.get());
-                *set_btn_text.write() = match btn_text.get() {
-                    StartStopButtonText::Start => StartStopButtonText::Stop,
-                    StartStopButtonText::Stop => StartStopButtonText::Start,
-                };
-            }
+            on:click=move |_| is_clicked_signal.set(!is_clicked_signal.get())
         >
-            {move || btn_text.get().as_str().to_uppercase()}
+            {move || if !is_clicked_signal.get() { "START" } else { "STOP" }}
         </button>
     }
 }
@@ -48,7 +21,7 @@ mod tests {
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
 
-    use super::{StartStopButton, StartStopButtonText};
+    use super::StartStopButton;
 
     wasm_bindgen_test_configure!(run_in_browser);
 
@@ -57,11 +30,10 @@ mod tests {
         // Arrange
         let document = document();
         let is_clicked_signal = RwSignal::new(false);
-        let btn_text_signal = RwSignal::new(StartStopButtonText::Start);
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
             test_wrapper.clone().unchecked_into(),
-            move || view! { <StartStopButton is_clicked_signal btn_text_signal /> },
+            move || view! { <StartStopButton is_clicked_signal /> },
         );
         let btn = test_wrapper
             .query_selector("button")
@@ -78,7 +50,6 @@ mod tests {
 
         // Assert
         assert!(is_clicked_signal.get_untracked());
-        assert_eq!(btn_text_signal.get_untracked(), StartStopButtonText::Stop);
         assert_eq!(btn.text_content().unwrap(), "STOP");
     }
 }
