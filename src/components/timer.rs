@@ -2,33 +2,55 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 
-const DEFAULT_TIMER_SECONDS: u64 = 5;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TimerMode {
+    Focus,
+    Break,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum TimerMode {
-    Focus(u64),
-    Break(u64),
+pub struct TimerDurations {
+    mode: RwSignal<TimerMode>,
+    focus: RwSignal<Duration>,
+    r#break: RwSignal<Duration>,
+}
+
+impl TimerDurations {
+    fn get_duration(&self) -> RwSignal<Duration> {
+        match self.mode.get() {
+            TimerMode::Focus => self.focus,
+            TimerMode::Break => self.r#break,
+        }
+    }
+
+    fn change_mode(&mut self) {
+        *self.mode.write() = match self.mode.get() {
+            TimerMode::Focus => TimerMode::Break,
+            TimerMode::Break => TimerMode::Focus,
+        }
+    }
 }
 
 #[component]
 pub fn CountdownTimer(
     timer_state: RwSignal<bool>,
-    #[prop(default = RwSignal::new(Duration::new(DEFAULT_TIMER_SECONDS, 0)))] duration: RwSignal<
-        Duration,
-    >,
-    #[prop(default=RwSignal::new(TimerMode::Focus(DEFAULT_TIMER_SECONDS)))] timer_mode: RwSignal<
-        TimerMode,
-    >,
+    #[prop(default=RwSignal::new(TimerDurations {
+        mode: RwSignal::new(TimerMode::Focus),
+        focus: RwSignal::new(Duration::new(5,0)),
+        r#break: RwSignal::new(Duration::new(1,0)),
+    }))]
+    timer_durations: RwSignal<TimerDurations>,
 ) -> impl IntoView {
-    create_timer_state_event(timer_state, duration);
+    create_timer_state_event(timer_state, timer_durations);
+    let duration = move || timer_durations.get_untracked().get_duration();
 
-    let seconds = move || duration.read().as_secs() % 60;
-    let minutes = move || (duration.read().as_secs() / 60) % 60;
-    let hours = move || (duration.read().as_secs() / 60) / 60;
+    let seconds = move || duration().read().as_secs() % 60;
+    let minutes = move || (duration().read().as_secs() / 60) % 60;
+    let hours = move || (duration().read().as_secs() / 60) / 60;
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
-            // TODO: use forloop <div class="flex flex-col">
+            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -70,7 +92,11 @@ pub fn CountdownTimer(
     }
 }
 
-fn create_timer_state_event(timer_state: RwSignal<bool>, duration: RwSignal<Duration>) {
+fn create_timer_state_event(
+    timer_state: RwSignal<bool>,
+    timer_durations: RwSignal<TimerDurations>,
+) {
+    let duration = timer_durations.get_untracked().get_duration();
     let interval_handle: RwSignal<Option<IntervalHandle>> = RwSignal::new(None);
     let stop = move || {
         if let Some(handle) = interval_handle.get_untracked() {
@@ -89,6 +115,7 @@ fn create_timer_state_event(timer_state: RwSignal<bool>, duration: RwSignal<Dura
                 } else {
                     stop();
                     timer_state.set(false);
+                    timer_durations.write().change_mode();
                 }
             },
             Duration::from_secs(1),
@@ -117,7 +144,6 @@ fn create_timer_state_event(timer_state: RwSignal<bool>, duration: RwSignal<Dura
 #[cfg(test)]
 #[allow(dead_code)]
 mod tests {
-
     use std::time::Duration;
 
     use leptos::{prelude::*, task::tick};
@@ -126,7 +152,7 @@ mod tests {
 
     use crate::components::timer::TimerMode;
 
-    use super::CountdownTimer;
+    use super::{CountdownTimer, TimerDurations};
 
     wasm_bindgen_test_configure!(run_in_browser);
 
@@ -135,13 +161,17 @@ mod tests {
         // Arrange
         let pomo_state = RwSignal::new(false);
         let duration = RwSignal::new(Duration::new(2, 0));
-        let timer_mode = RwSignal::new(TimerMode::Focus);
+        let timer_durations = RwSignal::new(TimerDurations {
+            mode: RwSignal::new(TimerMode::Focus),
+            focus: duration,
+            r#break: duration,
+        });
         let _duration_before = duration.get_untracked();
         let document = document();
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
             test_wrapper.clone().unchecked_into(),
-            move || view! { <CountdownTimer timer_state=pomo_state duration timer_mode /> },
+            move || view! { <CountdownTimer timer_state=pomo_state timer_durations /> },
         );
 
         // Act
@@ -155,10 +185,18 @@ mod tests {
         //     duration_before.as_micros()
         // );
 
+        // Arrange
+        *pomo_state.write() = false;
+        tick().await;
+
         // Act
         *duration.write() = Duration::new(0, 0);
+        *pomo_state.write() = true;
+        tick().await;
 
         // Assert
-        assert_eq!(timer_mode.get_untracked(), TimerMode::Break);
+        let TimerMode::Break = timer_durations.get_untracked().mode.get_untracked() else {
+            panic!("Expected Break enum variant.")
+        };
     }
 }
