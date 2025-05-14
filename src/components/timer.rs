@@ -87,8 +87,12 @@ pub fn CountdownTimer(
                 </span>
                 "S"
             </div>
-
         </div>
+
+        {move || match timer_durations.get().mode.get() {
+            TimerMode::Focus => "FOCUS!",
+            TimerMode::Break => "break",
+        }}
     }
 }
 
@@ -96,7 +100,7 @@ fn create_timer_state_event(
     timer_state: RwSignal<bool>,
     timer_durations: RwSignal<TimerDurations>,
 ) {
-    let duration = timer_durations.get_untracked().get_duration();
+    let duration = timer_durations.get_untracked().get_duration().clone();
     let interval_handle: RwSignal<Option<IntervalHandle>> = RwSignal::new(None);
     let stop = move || {
         if let Some(handle) = interval_handle.get_untracked() {
@@ -116,6 +120,7 @@ fn create_timer_state_event(
                     stop();
                     timer_state.set(false);
                     timer_durations.write().change_mode();
+                    duration.set(timer_durations.get().get_duration().get());
                 }
             },
             Duration::from_secs(1),
