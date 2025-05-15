@@ -17,7 +17,7 @@ pub struct TimerDurations {
 
 impl TimerDurations {
     fn get_duration(&self) -> Duration {
-        match self.mode.get() {
+        match self.mode.get_untracked() {
             TimerMode::Focus => self.focus,
             TimerMode::Break => self.r#break,
         }
