@@ -37,8 +37,8 @@ mod tests {
         assert!(inner.contains(
             "<button class=\"btn btn-circle btn-soft p-[142px] text-2xl\">START</button>"
         ));
-        assert!(inner.contains("hours"));
-        assert!(inner.contains("minutes"));
-        assert!(inner.contains("seconds"));
+        assert!(inner.contains("H"));
+        assert!(inner.contains("M"));
+        assert!(inner.contains("S"));
     }
 }
