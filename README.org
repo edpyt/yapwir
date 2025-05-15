@@ -1,0 +1,13 @@
+* yapwir
+  Yet Another Pomodoro Written In Rust  
+
+  [[https://github.com/user-attachments/assets/bb249ab4-0e2c-4f38-b46e-a49bc8cfd6b3]]
+
+** Explain
+   yep, there is a another pomodoro timer application.
+
+** Technologies
+   - [[https://v2.tauri.app/][tauri]]
+   - [[https://leptos.dev/][leptos]]
+   - [[https://daisyui.com/][daisyui]]
+
