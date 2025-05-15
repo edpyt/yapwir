@@ -1,0 +1,19 @@
+* yapwir
+  Yet Another Pomodoro Written In Rust  
+
+  #+html: <img src="https://github.com/user-attachments/assets/bb249ab4-0e2c-4f38-b46e-a49bc8cfd6b3"/>
+
+** Explain
+   yep, there is a another pomodoro timer application.
+
+*** Usage
+    1. click the main button
+    2. countdown will begin - focus on work
+    3. countdown will end - chill
+    4. repeat 
+
+** Technologies
+   - [[https://v2.tauri.app/][tauri]]
+   - [[https://leptos.dev/][leptos]]
+   - [[https://daisyui.com/][daisyui]]
+
