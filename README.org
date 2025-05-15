@@ -6,6 +6,12 @@
 ** Explain
    yep, there is a another pomodoro timer application.
 
+*** Usage
+    1. click the main button
+    2. countdown will begin - focus on work
+    3. countdown will end - chill
+    4. repeat 
+
 ** Technologies
    - [[https://v2.tauri.app/][tauri]]
    - [[https://leptos.dev/][leptos]]
