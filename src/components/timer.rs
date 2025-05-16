@@ -148,8 +148,9 @@ fn create_timer_state_event(
 #[cfg(test)]
 #[allow(dead_code)]
 mod tests {
-    use std::time::Duration;
+    use std::{ops::Add, time::Duration};
 
+    use gloo_timers::future::sleep;
     use leptos::{prelude::*, task::tick};
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
@@ -164,13 +165,12 @@ mod tests {
     async fn timer_state() {
         // Arrange
         let pomo_state = RwSignal::new(false);
-        let duration = Duration::new(2, 0);
+        let duration = Duration::new(1, 0);
         let timer_durations = RwSignal::new(TimerDurations {
             mode: RwSignal::new(TimerMode::Focus),
             focus: duration,
-            r#break: duration,
+            r#break: duration.add(Duration::new(41, 0)),
         });
-        let _duration_before = duration;
         let document = document();
         let test_wrapper = document.create_element("section").unwrap();
         let _dispose = mount_to(
@@ -181,18 +181,16 @@ mod tests {
         // Act
         *pomo_state.write() = true;
         tick().await;
+        sleep(duration.add(Duration::new(1, 0))).await;
+        tick().await;
 
-        // Assert
-        // TODO: need to sleep in test?
-        // assert_ne!(
-        //     duration.get_untracked().as_micros(),
-        //     duration_before.as_micros()
-        // );
-
-        // Assert
-        // TODO: if the timer has expired - change mode
-        // let TimerMode::Break = timer_durations.get_untracked().mode.get_untracked() else {
-        //     panic!("Expected Break enum variant.")
-        // };
+        // Assert - Timer expired
+        let TimerMode::Break = timer_durations.get_untracked().mode.get_untracked() else {
+            panic!("Expected Break enum variant.")
+        };
+        assert_eq!(
+            timer_durations.get_untracked().get_duration(),
+            Duration::new(42, 0)
+        );
     }
 }
