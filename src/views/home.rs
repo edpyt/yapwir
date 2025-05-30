@@ -14,7 +14,7 @@ pub fn HomeView(
     pomo_state: RwSignal<bool>,
     #[prop(default=RwSignal::new(TimerDurations {
         mode: RwSignal::new(TimerMode::Focus),
-        focus: Duration::new(5,0),
+        focus: Duration::new(3,0),
         r#break: Duration::new(5,0),
     }))]
     timer_durations: RwSignal<TimerDurations>,
@@ -35,11 +35,6 @@ pub fn HomeView(
         <dialog id="my_modal_1" class="modal">
             <div class="modal-box">
                 <SettingsView pomo_state timer_durations />
-                <div class="modal-action">
-                    <form method="dialog">
-                        <button class="btn btn-outline btn-error">X</button>
-                    </form>
-                </div>
             </div>
         </dialog>
     }

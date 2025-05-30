@@ -1,17 +1,23 @@
+use std::time::Duration;
+
 use leptos::prelude::*;
 
-use crate::components::timer::TimerDurations;
+use crate::{components::timer::TimerDurations, utils::convert_duration_to_hms_fn};
 
 #[component]
 pub fn SettingsView(
     pomo_state: RwSignal<bool>,
     timer_durations: RwSignal<TimerDurations>,
 ) -> impl IntoView {
+    let focus_duration = RwSignal::new(timer_durations.read().focus);
+    let break_duration = RwSignal::new(timer_durations.read().r#break);
+
+    let (hours_fc, minutes_fc, seconds_fc) = convert_duration_to_hms_fn(focus_duration);
+    let (hours_bk, minutes_bk, seconds_bk) = convert_duration_to_hms_fn(break_duration);
+
     view! {
         {move || {
             if *pomo_state.read() {
-                view! { <div>"All ok"</div> }
-            } else {
                 view! {
                     <div role="alert" class="alert alert-error">
                         <svg
@@ -27,11 +33,47 @@ pub fn SettingsView(
                                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        <span>Error! Task failed successfully.</span>
+                        <span>Error! Timer already started.</span>
                     </div>
                 }
+                    .into_any()
+            } else {
+                view! {
+                    <div>
+                        "Focus Duration:" <div class="flex gap-3">
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                        </div> "Break Duration:" <div class="flex gap-3">
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" class="input" required min="0" />
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                    .into_any()
             }
         }}
+        // FIXME: remove `modal` here
+        <div class="modal-action">
+            <button class="btn btn-outline btn-success">Save</button>
+            <form method="dialog">
+                <button class="btn btn-outline btn-error">Close</button>
+            </form>
+        </div>
     }
 }
 
