@@ -42,26 +42,61 @@ pub fn SettingsView(
                     <div>
                         "Focus Duration:" <div class="flex gap-3">
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="H"
+                                />
                             </div>
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="M"
+                                />
                             </div>
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="S"
+                                />
                             </div>
                         </div> "Break Duration:" <div class="flex gap-3">
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="H"
+                                />
                             </div>
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="M"
+                                />
                             </div>
                             <div class="flex-1">
-                                <input type="number" class="input" required min="0" />
+                                <input
+                                    type="number"
+                                    class="input"
+                                    required
+                                    min="0"
+                                    placeholder="S"
+                                />
                             </div>
                         </div>
-
                     </div>
                 }
                     .into_any()
