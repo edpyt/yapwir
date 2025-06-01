@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use leptos::prelude::*;
+use leptos::{leptos_dom::logging::console_log, prelude::*};
 
 use crate::{components::timer::TimerDurations, utils::convert_duration_to_hms_fn};
 
@@ -23,11 +23,8 @@ pub fn SettingsView(
     pomo_state: RwSignal<bool>,
     timer_durations: RwSignal<TimerDurations>,
 ) -> impl IntoView {
-    let focus_duration = RwSignal::new(timer_durations.read().focus);
-    let break_duration = RwSignal::new(timer_durations.read().r#break);
-
-    let (hours_fc, minutes_fc, seconds_fc) = convert_duration_to_hms_fn(focus_duration);
-    let (hours_bk, minutes_bk, seconds_bk) = convert_duration_to_hms_fn(break_duration);
+    let focus_duration = RwSignal::new(timer_durations.read_untracked().focus);
+    let break_duration = RwSignal::new(timer_durations.read_untracked().r#break);
 
     view! {
         {move || {
@@ -36,63 +33,8 @@ pub fn SettingsView(
             } else {
                 view! {
                     <div>
-                        "Focus Duration:" <div class="flex gap-3">
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="H"
-                                />
-                            </div>
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="M"
-                                />
-                            </div>
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="S"
-                                />
-                            </div>
-                        </div> "Break Duration:" <div class="flex gap-3">
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="H"
-                                />
-                            </div>
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="M"
-                                />
-                            </div>
-                            <div class="flex-1">
-                                <input
-                                    type="number"
-                                    class="input"
-                                    required
-                                    min="0"
-                                    placeholder="S"
-                                />
-                            </div>
-                        </div>
+                        "Focus Duration:" <DurationSetupInput duration=focus_duration />
+                        "Break Duration:" <DurationSetupInput duration=break_duration />
                     </div>
                 }
                     .into_any()
@@ -128,6 +70,50 @@ fn TimerAlreadyStartedAlert() -> impl IntoView {
                 />
             </svg>
             <span>Error! Timer already started.</span>
+        </div>
+    }
+}
+
+#[component]
+fn DurationSetupInput(duration: RwSignal<Duration>) -> impl IntoView {
+    let (hours, minutes, seconds) = convert_duration_to_hms_fn(duration);
+
+    view! {
+        <div class="flex gap-3">
+            <div class="flex-1">
+                <input
+                    type="number"
+                    class="input"
+                    required
+                    min="0"
+                    placeholder="H"
+                    prop:value=hours
+                    on:input:target=move |_| *duration.write() += Duration::from_secs(60 * 60)
+                />
+
+            </div>
+            <div class="flex-1">
+                <input
+                    type="number"
+                    class="input"
+                    required
+                    min="0"
+                    placeholder="M"
+                    prop:value=minutes
+                    on:input:target=move |_| *duration.write() += Duration::from_secs(60)
+                />
+            </div>
+            <div class="flex-1">
+                <input
+                    type="number"
+                    class="input"
+                    required
+                    min="0"
+                    placeholder="S"
+                    prop:value=seconds
+                    on:input:target=move |_| *duration.write() += Duration::from_secs(1)
+                />
+            </div>
         </div>
     }
 }
