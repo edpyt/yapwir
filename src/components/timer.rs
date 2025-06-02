@@ -140,7 +140,7 @@ fn create_timer_state_event(
     Effect::watch(
         move || timer_durations.get(),
         move |timer_durations, _, _| duration.set(timer_durations.get_duration()),
-        true,
+        false,
     );
 
     on_cleanup(stop);
