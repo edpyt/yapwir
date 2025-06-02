@@ -1,18 +1,15 @@
 pub mod components;
+pub mod utils;
+pub mod views;
 
-use components::{CountdownTimer, StartStopButton};
 use leptos::prelude::*;
+use views::HomeView;
 
 #[component]
 pub fn App() -> impl IntoView {
     let pomo_state = RwSignal::new(false);
 
-    view! {
-        <div class="grid h-screen w-screen content-center justify-items-center gap-5">
-            <StartStopButton is_clicked_signal=pomo_state />
-            <CountdownTimer timer_state=pomo_state />
-        </div>
-    }
+    view! { <HomeView pomo_state /> }
 }
 
 #[cfg(test)]

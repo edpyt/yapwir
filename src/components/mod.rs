@@ -1,5 +1,5 @@
-mod main_button;
-mod timer;
+mod pomobutton;
+pub(crate) mod timer;
 
-pub use main_button::StartStopButton;
+pub use pomobutton::StartStopButton;
 pub use timer::CountdownTimer;

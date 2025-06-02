@@ -2,6 +2,8 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 
+use crate::utils::convert_duration_to_hms_fn;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TimerMode {
     Focus,
@@ -10,9 +12,9 @@ pub enum TimerMode {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TimerDurations {
-    mode: RwSignal<TimerMode>,
-    focus: Duration,
-    r#break: Duration,
+    pub mode: RwSignal<TimerMode>,
+    pub focus: Duration,
+    pub r#break: Duration,
 }
 
 impl TimerDurations {
@@ -34,19 +36,12 @@ impl TimerDurations {
 #[component]
 pub fn CountdownTimer(
     timer_state: RwSignal<bool>,
-    #[prop(default=RwSignal::new(TimerDurations {
-        mode: RwSignal::new(TimerMode::Focus),
-        focus: Duration::new(5,0),
-        r#break: Duration::new(5,0),
-    }))]
     timer_durations: RwSignal<TimerDurations>,
 ) -> impl IntoView {
     let duration = RwSignal::new(timer_durations.get_untracked().get_duration());
     create_timer_state_event(timer_state, timer_durations, duration);
 
-    let seconds = move || duration.read().as_secs() % 60;
-    let minutes = move || (duration.read().as_secs() / 60) % 60;
-    let hours = move || (duration.read().as_secs() / 60) / 60;
+    let (hours, minutes, seconds) = convert_duration_to_hms_fn(duration);
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
@@ -140,6 +135,12 @@ fn create_timer_state_event(
             false => stop(),
         },
         true,
+    );
+
+    Effect::watch(
+        move || timer_durations.get(),
+        move |timer_durations, _, _| duration.set(timer_durations.get_duration()),
+        false,
     );
 
     on_cleanup(stop);
