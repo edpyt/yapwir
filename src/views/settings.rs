@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use leptos::{leptos_dom::logging::console_log, prelude::*};
+use leptos::prelude::*;
 
 use crate::{components::timer::TimerDurations, utils::convert_duration_to_hms_fn};
 
@@ -43,7 +43,17 @@ pub fn SettingsView(
         // FIXME: remove `modal` here
         <div class="modal-action">
             <Show when=move || !*pomo_state.read()>
-                <button class="btn btn-outline btn-success">Save</button>
+                <button
+                    class="btn btn-outline btn-success"
+                    on:click=move |_| {
+                        let mut timer_durations = timer_durations.write();
+                        timer_durations.focus = *focus_duration.read();
+                        timer_durations.r#break = *break_duration.read();
+                    }
+                >
+
+                    Save
+                </button>
             </Show>
             <form method="dialog">
                 <button class="btn btn-outline btn-error">Close</button>
@@ -78,6 +88,20 @@ fn TimerAlreadyStartedAlert() -> impl IntoView {
 fn DurationSetupInput(duration: RwSignal<Duration>) -> impl IntoView {
     let (hours, minutes, seconds) = convert_duration_to_hms_fn(duration);
 
+    let on_input_hms =
+        move |ev: leptos::ev::Targeted<leptos::ev::Event, leptos::web_sys::HtmlInputElement>| {
+            let new_value: u64 = ev.target().value().parse().expect("Can't parse as number");
+
+            let new_duration = match ev.target().placeholder().as_str() {
+                "H" => Duration::from_secs((new_value * 60 * 60) + (minutes() * 60) + seconds()),
+                "M" => Duration::from_secs((hours() * 60 * 60) + (new_value * 60) + seconds()),
+                "S" => Duration::from_secs((hours() * 60 * 60) + (minutes() * 60) + new_value),
+                _ => todo!(),
+            };
+
+            duration.set(new_duration);
+        };
+
     view! {
         <div class="flex gap-3">
             <div class="flex-1">
@@ -88,7 +112,7 @@ fn DurationSetupInput(duration: RwSignal<Duration>) -> impl IntoView {
                     min="0"
                     placeholder="H"
                     prop:value=hours
-                    on:input:target=move |_| *duration.write() += Duration::from_secs(60 * 60)
+                    on:input:target=on_input_hms
                 />
 
             </div>
@@ -100,7 +124,7 @@ fn DurationSetupInput(duration: RwSignal<Duration>) -> impl IntoView {
                     min="0"
                     placeholder="M"
                     prop:value=minutes
-                    on:input:target=move |_| *duration.write() += Duration::from_secs(60)
+                    on:input:target=on_input_hms
                 />
             </div>
             <div class="flex-1">
@@ -111,7 +135,7 @@ fn DurationSetupInput(duration: RwSignal<Duration>) -> impl IntoView {
                     min="0"
                     placeholder="S"
                     prop:value=seconds
-                    on:input:target=move |_| *duration.write() += Duration::from_secs(1)
+                    on:input:target=on_input_hms
                 />
             </div>
         </div>
