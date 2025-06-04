@@ -137,11 +137,11 @@ fn create_timer_state_event(
         true,
     );
 
-    // Effect::watch(
-    //     move || timer_durations.get(),
-    //     move |timer_durations, _, _| duration.set(timer_durations.get_duration()),
-    //     false,
-    // );
+    Effect::watch(
+        move || timer_durations.get(),
+        move |timer_durations, _, _| duration.set(timer_durations.get_duration()),
+        false,
+    );
 
     on_cleanup(stop);
 }
@@ -182,7 +182,7 @@ mod tests {
         // Act
         *pomo_state.write() = true;
         tick().await;
-        sleep(duration.add(Duration::new(1, 0))).await;
+        sleep(duration.add(Duration::new(2, 0))).await;
         tick().await;
 
         // Assert - Timer expired
