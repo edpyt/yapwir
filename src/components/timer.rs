@@ -182,7 +182,7 @@ mod tests {
         // Act
         *pomo_state.write() = true;
         tick().await;
-        sleep(duration.add(Duration::new(1, 0))).await;
+        sleep(duration.add(Duration::new(1, 420))).await;
         tick().await;
 
         // Assert - Timer expired
