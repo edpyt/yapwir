@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 
-use crate::utils::convert_duration_to_hms_fn;
+use crate::{send_notification, utils::convert_duration_to_hms_fn};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TimerMode {
@@ -115,6 +115,7 @@ fn create_timer_state_event(
                     timer_state.set(false);
                     timer_durations.write().change_mode();
                     duration.set(timer_durations.get_untracked().get_duration());
+                    send_notification("bob", "wachovsky");
                 }
             },
             Duration::from_secs(1),

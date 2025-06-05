@@ -4,6 +4,13 @@ pub mod views;
 
 use leptos::prelude::*;
 use views::HomeView;
+use wasm_bindgen::prelude::wasm_bindgen;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
+    fn send_notification(title: &str, body: &str);
+}
 
 #[component]
 pub fn App() -> impl IntoView {
