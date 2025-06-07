@@ -116,12 +116,13 @@ fn create_timer_state_event(
                     timer_state.set(false);
                     timer_durations.write().change_mode();
                     duration.set(timer_durations.get_untracked().get_duration());
+
                     spawn_local(async move {
                         let args = to_value(&SendNotificationArgs {
-                            title: "Timer Stoped!",
+                            title: "Session end.",
                             body: match timer_durations.get_untracked().mode.get_untracked() {
-                                focus => "U can rest now",
-                                r#break => "U need to focus",
+                                TimerMode::Focus => "U need to focus",
+                                TimerMode::Break => "U can rest now",
                             },
                         })
                         .unwrap();
