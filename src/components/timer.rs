@@ -1,8 +1,9 @@
 use std::time::Duration;
 
-use leptos::prelude::*;
+use leptos::{prelude::*, task::spawn_local};
+use serde_wasm_bindgen::to_value;
 
-use crate::utils::convert_duration_to_hms_fn;
+use crate::{invoke, utils::convert_duration_to_hms_fn, SendNotificationArgs};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TimerMode {
@@ -115,6 +116,17 @@ fn create_timer_state_event(
                     timer_state.set(false);
                     timer_durations.write().change_mode();
                     duration.set(timer_durations.get_untracked().get_duration());
+                    spawn_local(async move {
+                        let args = to_value(&SendNotificationArgs {
+                            title: "Timer Stoped!",
+                            body: match timer_durations.get_untracked().mode.get_untracked() {
+                                focus => "U can rest now",
+                                r#break => "U need to focus",
+                            },
+                        })
+                        .unwrap();
+                        invoke("send_notification", args).await;
+                    });
                 }
             },
             Duration::from_secs(1),
