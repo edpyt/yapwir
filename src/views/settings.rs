@@ -22,6 +22,7 @@ pub fn GearSvg() -> impl IntoView {
 pub fn SettingsView(
     pomo_state: RwSignal<bool>,
     timer_durations: RwSignal<TimerDurations>,
+    task_title: RwSignal<String>,
 ) -> impl IntoView {
     let focus_duration = RwSignal::new(timer_durations.read_untracked().focus);
     let break_duration = RwSignal::new(timer_durations.read_untracked().r#break);
@@ -33,8 +34,18 @@ pub fn SettingsView(
             } else {
                 view! {
                     <div>
-                        "Focus Duration:" <DurationSetupInput duration=focus_duration />
-                        "Break Duration:" <DurationSetupInput duration=break_duration />
+                        <div class="pb-5">
+                            <p>"Task Title:"</p>
+                            <input
+                                type="text"
+                                placeholder="Type task title here"
+                                class="input w-full"
+                                prop:value=task_title
+                                on:input:target=move |ev| task_title.set(ev.target().value())
+                            />
+                        </div>
+                        <div>"Focus Duration:" <DurationSetupInput duration=focus_duration /></div>
+                        <div>"Break Duration:" <DurationSetupInput duration=break_duration /></div>
                     </div>
                 }
                     .into_any()

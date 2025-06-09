@@ -46,7 +46,6 @@ pub fn CountdownTimer(
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
-            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -59,6 +58,7 @@ pub fn CountdownTimer(
                 </span>
                 "H"
             </div>
+            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span

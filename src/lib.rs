@@ -2,6 +2,9 @@ pub mod components;
 pub mod utils;
 pub mod views;
 
+use std::time::Duration;
+
+use components::timer::{TimerDurations, TimerMode};
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 use views::HomeView;
@@ -21,9 +24,29 @@ pub struct SendNotificationArgs<'a> {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let pomo_state = RwSignal::new(false);
+    let config = PomoConfig::default();
 
-    view! { <HomeView pomo_state /> }
+    view! { <HomeView config /> }
+}
+
+pub struct PomoConfig {
+    pomo_state: RwSignal<bool>,
+    timer_durations: RwSignal<TimerDurations>,
+    task_title: RwSignal<String>,
+}
+
+impl Default for PomoConfig {
+    fn default() -> Self {
+        PomoConfig {
+            pomo_state: RwSignal::new(false),
+            timer_durations: RwSignal::new(TimerDurations {
+                mode: RwSignal::new(TimerMode::Focus),
+                focus: Duration::new(3, 0),
+                r#break: Duration::new(5, 0),
+            }),
+            task_title: RwSignal::new(String::new()),
+        }
+    }
 }
 
 #[cfg(test)]
