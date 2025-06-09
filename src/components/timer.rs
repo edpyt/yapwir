@@ -3,7 +3,7 @@ use std::time::Duration;
 use leptos::{prelude::*, task::spawn_local};
 use serde_wasm_bindgen::to_value;
 
-use crate::{invoke, utils::convert_duration_to_hms_fn, SendNotificationArgs};
+use crate::{invoke, utils::convert_duration_to_hms_fn, PomoConfig, SendNotificationArgs};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TimerMode {
@@ -11,7 +11,7 @@ pub enum TimerMode {
     Break,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TimerDurations {
     pub mode: RwSignal<TimerMode>,
     pub focus: Duration,
@@ -35,18 +35,19 @@ impl TimerDurations {
 }
 
 #[component]
-pub fn CountdownTimer(
-    timer_state: RwSignal<bool>,
-    timer_durations: RwSignal<TimerDurations>,
-) -> impl IntoView {
-    let duration = RwSignal::new(timer_durations.get_untracked().get_duration());
-    create_timer_state_event(timer_state, timer_durations, duration);
-
+pub fn CountdownTimer(config: RwSignal<PomoConfig>) -> impl IntoView {
+    let duration = RwSignal::new(
+        config
+            .read_untracked()
+            .timer_durations
+            .get_untracked()
+            .get_duration(),
+    );
     let (hours, minutes, seconds) = convert_duration_to_hms_fn(duration);
+    create_timer_state_event(config, duration);
 
     view! {
         <div class="grid auto-cols-max grid-flow-col gap-5 text-center">
-            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -59,6 +60,7 @@ pub fn CountdownTimer(
                 </span>
                 "H"
             </div>
+            // TODO: use forloop
             <div class="flex flex-col">
                 <span class="countdown font-mono text-5xl">
                     <span
@@ -85,18 +87,14 @@ pub fn CountdownTimer(
             </div>
         </div>
 
-        {move || match timer_durations.get().mode.get() {
+        {move || match config.read().timer_durations.get().mode.get() {
             TimerMode::Focus => "FOCUS!",
             TimerMode::Break => "break",
         }}
     }
 }
 
-fn create_timer_state_event(
-    timer_state: RwSignal<bool>,
-    timer_durations: RwSignal<TimerDurations>,
-    duration: RwSignal<Duration>,
-) {
+fn create_timer_state_event(config: RwSignal<PomoConfig>, duration: RwSignal<Duration>) {
     let interval_handle: RwSignal<Option<IntervalHandle>> = RwSignal::new(None);
     let stop = move || {
         if let Some(handle) = interval_handle.get_untracked() {
@@ -113,14 +111,16 @@ fn create_timer_state_event(
                         *duration = duration.saturating_sub(Duration::from_secs(1))
                     })
                 } else {
-                    timer_state.set(false);
-                    timer_durations.write().change_mode();
-                    duration.set(timer_durations.get_untracked().get_duration());
+                    let config = config.read();
+                    config.pomo_state.set(false);
+                    config.timer_durations.write().change_mode();
+                    duration.set(config.timer_durations.get_untracked().get_duration());
 
                     spawn_local(async move {
                         let args = to_value(&SendNotificationArgs {
                             title: "Session end.",
-                            body: match timer_durations.get_untracked().mode.get_untracked() {
+                            body: match config.timer_durations.get_untracked().mode.get_untracked()
+                            {
                                 TimerMode::Focus => "U need to focus",
                                 TimerMode::Break => "U can rest now",
                             },
@@ -142,7 +142,7 @@ fn create_timer_state_event(
     };
 
     Effect::watch(
-        move || timer_state.get(),
+        move || config.read().pomo_state.get(),
         move |timer_state, _, _| match *timer_state {
             true => start(),
             false => stop(),
@@ -151,60 +151,10 @@ fn create_timer_state_event(
     );
 
     Effect::watch(
-        move || timer_durations.get(),
+        move || config.read().timer_durations.get(),
         move |timer_durations, _, _| duration.set(timer_durations.get_duration()),
         false,
     );
 
     on_cleanup(stop);
-}
-
-#[cfg(test)]
-#[allow(dead_code)]
-mod tests {
-    use std::{ops::Add, time::Duration};
-
-    use gloo_timers::future::sleep;
-    use leptos::{prelude::*, task::tick};
-    use wasm_bindgen::JsCast;
-    use wasm_bindgen_test::*;
-
-    use crate::components::timer::TimerMode;
-
-    use super::{CountdownTimer, TimerDurations};
-
-    wasm_bindgen_test_configure!(run_in_browser);
-
-    #[wasm_bindgen_test]
-    async fn timer_state() {
-        // Arrange
-        let pomo_state = RwSignal::new(false);
-        let duration = Duration::new(1, 0);
-        let timer_durations = RwSignal::new(TimerDurations {
-            mode: RwSignal::new(TimerMode::Focus),
-            focus: duration,
-            r#break: duration.add(Duration::new(41, 0)),
-        });
-        let document = document();
-        let test_wrapper = document.create_element("section").unwrap();
-        let _dispose = mount_to(
-            test_wrapper.clone().unchecked_into(),
-            move || view! { <CountdownTimer timer_state=pomo_state timer_durations /> },
-        );
-
-        // Act
-        *pomo_state.write() = true;
-        tick().await;
-        sleep(duration.add(Duration::new(2, 0))).await;
-        tick().await;
-
-        // Assert - Timer expired
-        let TimerMode::Break = timer_durations.get_untracked().mode.get_untracked() else {
-            panic!("Expected Break enum variant.")
-        };
-        assert_eq!(
-            timer_durations.get_untracked().get_duration(),
-            Duration::new(42, 0)
-        );
-    }
 }

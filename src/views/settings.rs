@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 
-use crate::{components::timer::TimerDurations, utils::convert_duration_to_hms_fn};
+use crate::{utils::convert_duration_to_hms_fn, PomoConfig};
 
 #[component]
 pub fn GearSvg() -> impl IntoView {
@@ -19,22 +19,42 @@ pub fn GearSvg() -> impl IntoView {
 }
 
 #[component]
-pub fn SettingsView(
-    pomo_state: RwSignal<bool>,
-    timer_durations: RwSignal<TimerDurations>,
-) -> impl IntoView {
-    let focus_duration = RwSignal::new(timer_durations.read_untracked().focus);
-    let break_duration = RwSignal::new(timer_durations.read_untracked().r#break);
+pub fn SettingsView(config: RwSignal<PomoConfig>) -> impl IntoView {
+    let focus_duration = RwSignal::new(
+        config
+            .read_untracked()
+            .timer_durations
+            .read_untracked()
+            .focus,
+    );
+    let break_duration = RwSignal::new(
+        config
+            .read_untracked()
+            .timer_durations
+            .read_untracked()
+            .r#break,
+    );
 
     view! {
         {move || {
-            if *pomo_state.read() {
+            if *config.read().pomo_state.read() {
                 TimerAlreadyStartedAlert().into_any()
             } else {
+                let config = config.read();
                 view! {
                     <div>
-                        "Focus Duration:" <DurationSetupInput duration=focus_duration />
-                        "Break Duration:" <DurationSetupInput duration=break_duration />
+                        <div class="pb-5">
+                            <p>"Task Title:"</p>
+                            <input
+                                type="text"
+                                placeholder="Type task title here"
+                                class="input w-full"
+                                prop:value=config.task_title
+                                on:input:target=move |ev| config.task_title.set(ev.target().value())
+                            />
+                        </div>
+                        <div>"Focus Duration:" <DurationSetupInput duration=focus_duration /></div>
+                        <div>"Break Duration:" <DurationSetupInput duration=break_duration /></div>
                     </div>
                 }
                     .into_any()
@@ -42,11 +62,11 @@ pub fn SettingsView(
         }}
         // FIXME: remove `modal` here
         <div class="modal-action">
-            <Show when=move || !*pomo_state.read()>
+            <Show when=move || !*config.read().pomo_state.read()>
                 <button
                     class="btn btn-outline btn-success"
                     on:click=move |_| {
-                        let mut timer_durations = timer_durations.write();
+                        let mut timer_durations = *config.read().timer_durations.write();
                         timer_durations.focus = *focus_duration.read();
                         timer_durations.r#break = *break_duration.read();
                     }
