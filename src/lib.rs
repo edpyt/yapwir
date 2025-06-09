@@ -24,11 +24,12 @@ pub struct SendNotificationArgs<'a> {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let config = PomoConfig::default();
+    let config = RwSignal::new(PomoConfig::default());
 
     view! { <HomeView config /> }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PomoConfig {
     pomo_state: RwSignal<bool>,
     timer_durations: RwSignal<TimerDurations>,
