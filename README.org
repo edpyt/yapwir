@@ -12,6 +12,8 @@
     3. countdown will end - chill
     4. repeat 
 
+    [[https://github-production-user-asset-6210df.s3.amazonaws.com/125578104/455954470-fd6dcc83-45d3-45f8-a084-c2b15c9bb87d.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250617%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250617T105008Z&X-Amz-Expires=300&X-Amz-Signature=f38d69a593914cf308aafecdff5e7599b07922076b8663ec4edadd217745c3ad&X-Amz-SignedHeaders=host]]
+
 ** Technologies
    - [[https://v2.tauri.app/][tauri]]
    - [[https://leptos.dev/][leptos]]
